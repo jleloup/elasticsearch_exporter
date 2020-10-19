@@ -47,6 +47,9 @@ func main() {
 		esExportClusterSettings = kingpin.Flag("es.cluster_settings",
 			"Export stats for cluster settings.").
 			Default("false").Envar("ES_CLUSTER_SETTINGS").Bool()
+		esExportIsm = kingpin.Flag("es.ism",
+			"Export stats for Opendistro's IndexStateManagement in the cluster.").
+			Default("false").Envar("ES_ISM").Bool()
 		esExportShards = kingpin.Flag("es.shards",
 			"Export stats for shards in the cluster (implies --es.indices).").
 			Default("false").Envar("ES_SHARDS").Bool()
@@ -76,7 +79,7 @@ func main() {
 			Default("logfmt").Envar("LOG_FMT").String()
 		logOutput = kingpin.Flag("log.output",
 			"Sets the log output. Valid outputs are stdout and stderr").
-			Default("stdout").Envar("LOG_OUTPUT").String()
+			Default("stdout").Envar("LOG_OUTPUT").String(),
 	)
 
 	kingpin.Version(version.Print(Name))
@@ -134,6 +137,10 @@ func main() {
 
 	if *esExportIndicesSettings {
 		prometheus.MustRegister(collector.NewIndicesSettings(logger, httpClient, esURL))
+	}
+
+	if *esExportIsm {
+		prometheus.MustRegister(collector.NewIsm(logger, httpClient, esURL))
 	}
 
 	// create a http server
